@@ -126,7 +126,7 @@ class ArchiveImages:
                 shutil.move(image_source, image_target)
         else:
             if self.isduplicate(image_source, image_target):
-                pass
+                logging.warning('Skip "{}" as it is a duplicate of "{}"!'.format(image))
             else:
                 pass
 
