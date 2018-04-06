@@ -139,20 +139,19 @@ def isduplicate(image1, image2):
 def add_suffix(image_target):
     """Adds suffix to image_target if a file with the same path already exists."""
     ext = os.path.splitext(image_target)[1]
+    image_target_orig = image_target
     i_suffix = 1
     while os.path.exists(image_target):
-        image_target = image_target.replace(ext, '_{:02d}'.format(i_suffix) + ext)
+        image_target = image_target_orig.replace(ext, '_{:02d}'.format(i_suffix) + ext)
         i_suffix += 1
     return image_target
 
 
 def add_image_to_archive(args, image_source, image_target):
+    """Adds image to image archive."""
     logging.info('{} "{}" to "{}"'.format(args.mode, image_source, image_target))
     os.makedirs(os.path.dirname(image_target), exist_ok=True)
-    if args.mode == 'copy':
-        shutil.copy(image_source, image_target)
-    elif args.mode == 'move':
-        shutil.move(image_source, image_target)
+    getattr(shutil, args.mode)(image_source, image_target)
 
 
 if __name__ == '__main__':
