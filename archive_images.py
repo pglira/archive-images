@@ -147,15 +147,12 @@ def add_suffix(image_target):
 
 
 def add_image_to_archive(args, image_source, image_target):
-    if image_target is not None:
-        logging.info('{} "{}" to "{}"'.format(args.mode, image_source, image_target))
-        os.makedirs(os.path.dirname(image_target), exist_ok=True)
-        if args.mode == 'copy':
-            shutil.copy(image_source, image_target)
-        elif args.mode == 'move':
-            shutil.move(image_source, image_target)
-    else:
-        pass
+    logging.info('{} "{}" to "{}"'.format(args.mode, image_source, image_target))
+    os.makedirs(os.path.dirname(image_target), exist_ok=True)
+    if args.mode == 'copy':
+        shutil.copy(image_source, image_target)
+    elif args.mode == 'move':
+        shutil.move(image_source, image_target)
 
 
 if __name__ == '__main__':
