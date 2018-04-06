@@ -65,6 +65,9 @@ class ArchiveImages:
                             required=True, type=path_to_folder)
         parser.add_argument('-m', '--mode', help='Move or copy image files to archive?', dest='mode',
                             required=False, default='copy', choices=['copy', 'move'])
+        parser.add_argument('-d', '--deleteDuplicates',
+                            help='Delete image in "imageFolder" if a duplicate is already present in "imageArchive"?',
+                            dest='deleteDuplicates', required=False, default=False, action='store_true')
         self.args = parser.parse_args(args_in)
 
         if self.args.imageFolder == self.args.imageArchive:
@@ -126,7 +129,11 @@ class ArchiveImages:
                 shutil.move(image_source, image_target)
         else:
             if self.isduplicate(image_source, image_target):
-                logging.warning('Skip "{}" as it is a duplicate of "{}"!'.format(image_source, image_target))
+                if self.args.deleteDuplicates:
+                    logging.warning('Delete "{}" as it is a duplicate of "{}"!'.format(image_source, image_target))
+                    # os.remove(image_source)
+                else:
+                    logging.warning('Skip "{}" as it is a duplicate of "{}"!'.format(image_source, image_target))
             else:
                 pass
 
