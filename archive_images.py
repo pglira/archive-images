@@ -10,32 +10,18 @@ from PIL import Image
 
 
 def main(args_in=sys.argv[1:]):
-    setup_logging()
     args = parse_args(args_in)
+    setup_logging(args_in, args)
     images_source = find_images(args)
 
-    for image_source in images_source:
+    for idx_image, image_source in enumerate(images_source):
         timestamp = get_timestamp(image_source)
         image_target = get_image_target(args, image_source, timestamp)
         image_target = check_duplicate(args, image_source, image_target)
-        image_target = add_suffix(image_target)
-        add_image_to_archive(args, image_source, image_target)
+        image_target = add_suffix(args, image_source, image_target)
+        add_image_to_archive(args, image_source, image_target, idx_image, len(images_source))
 
     sys.exit(0)
-
-
-def setup_logging():
-    """Set up and start logger."""
-    logger = logging.getLogger()  # create logger
-    logger.setLevel(logging.DEBUG)
-
-    ch = logging.StreamHandler(sys.stdout)  # create console handler
-    ch.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s|%(levelname)s: %(message)s')
-    ch.setFormatter(formatter)
-
-    logger.addHandler(ch)  # add the handlers to the logger
 
 
 def parse_args(args_in):
@@ -60,6 +46,10 @@ def parse_args(args_in):
                         required=True, type=path_to_folder)
     parser.add_argument('-m', '--mode', help='Move or copy image files to archive?', dest='mode',
                         required=False, default='copy', choices=['copy', 'move'])
+    parser.add_argument('-d', '--addDuplicates', help='Add duplicates to a subfolder "duplicates" in image archive?',
+                        dest='addDuplicates', required=False, action='store_true')
+    parser.add_argument('-n', '--addNoExif', help='Add images with no exif information to a subfolder "no_exif" in \
+                        image archive?', dest='addNoExif', required=False, action='store_true')
     args = parser.parse_args(args_in)
 
     if args.imageFolder == args.imageArchive:
@@ -67,6 +57,37 @@ def parse_args(args_in):
         sys.exit(1)
 
     return args
+
+
+def setup_logging(args_in, args):
+    """Set up and start logger."""
+    output_dir = os.path.join(args.imageArchive, 'logs')
+    os.makedirs(output_dir, exist_ok=True)
+    now = datetime.datetime.now()
+    file = 'log_' + now.strftime('%Y-%m-%d_%H-%M-%S') + '.txt'
+    path_to_log = os.path.join(output_dir, file)
+
+    # Create logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Create file handler
+    fh = logging.FileHandler(path_to_log, mode='w')
+
+    # Create console handler
+    ch = logging.StreamHandler(sys.stdout)
+
+    # Create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s|%(levelname)s: %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    # Add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
+    # Start and report input arguments
+    logging.info('Call: imageArchive ' + ' '.join(args_in))
 
 
 def find_images(args):
@@ -124,7 +145,7 @@ def get_image_target(args, image_source, timestamp):
 
 
 def check_duplicate(args, image_source, image_target):
-    """Check if a duplicate image exists alread in image archive and alter image_target if necessary."""
+    """Check if a duplicate image exists already in image archive and alter image_target if necessary."""
     if os.path.exists(image_target):
         if isduplicate(image_source, image_target):
             image_target = os.path.join(args.imageArchive, 'duplicate_images', os.path.basename(image_target))
@@ -136,20 +157,21 @@ def isduplicate(image1, image2):
     return open(image1, 'rb').read() == open(image2, 'rb').read()
 
 
-def add_suffix(image_target):
+def add_suffix(args, image_source, image_target):
     """Adds suffix to image_target if a file with the same path already exists."""
     ext = os.path.splitext(image_target)[1]
     image_target_orig = image_target
     i_suffix = 1
     while os.path.exists(image_target):
         image_target = image_target_orig.replace(ext, '_{:02d}'.format(i_suffix) + ext)
+        image_target = check_duplicate(args, image_source, image_target)
         i_suffix += 1
     return image_target
 
 
-def add_image_to_archive(args, image_source, image_target):
+def add_image_to_archive(args, image_source, image_target, idx_image, num_images):
     """Adds image to image archive."""
-    logging.info('{} "{}" to "{}"'.format(args.mode, image_source, image_target))
+    logging.info('Image {} of {}: {} "{}" to "{}"'.format(idx_image + 1, num_images, args.mode, image_source, image_target))
     os.makedirs(os.path.dirname(image_target), exist_ok=True)
     getattr(shutil, args.mode)(image_source, image_target)
 
