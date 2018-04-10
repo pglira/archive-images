@@ -53,6 +53,8 @@ def parse_args(args_in):
                         dest='addDuplicates', required=False, action='store_true')
     parser.add_argument('-n', '--addNoExif', help='Add images with no exif information to a subfolder "no_exif" in \
                         image archive?', dest='addNoExif', required=False, action='store_true')
+    parser.add_argument('-c', '--confirm', help='Confirm each operation?', dest='confirm', required=False,
+                        action='store_true')
     args = parser.parse_args(args_in)
 
     if args.imageFolder == args.imageArchive:
@@ -72,7 +74,7 @@ def setup_logging(args_in, args):
 
     # Create logger
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Create file handler
     fh = logging.FileHandler(path_to_log, mode='w')
@@ -117,10 +119,8 @@ def get_timestamp(image):
     exif_tags = [(36867, 37521),
                  (36868, 37522),
                  (306, 37520)]
-    exif = Image.open(image)._getexif()
-    if exif is None:  # image has no exif data
-        return None
-    else:
+    exif = read_exif(image)
+    if exif is not None:
         for tag in exif_tags:
             datetime_exif = exif.get(tag[0])
             subseconds_exif = int(exif.get(tag[1], 0)) / 1000  # subseconds are milliseconds
@@ -132,6 +132,23 @@ def get_timestamp(image):
             timestamp = datetime.datetime.strptime(datetime_exif, '%Y:%m:%d %H:%M:%S') + \
                         datetime.timedelta(0, subseconds_exif)
             return timestamp
+    else:  # image has no exif data
+        return None
+
+
+def read_exif(image):
+    """Read exif data from image."""
+    try:
+        img = Image.open(image)
+    except IOError:
+        logging.error('"{}" can not be opened as image!'.format(image))
+        sys.exit(1)
+    get_exif = getattr(img, '_getexif', None)
+    if callable(get_exif):  # if instance 'img' has method 'get_exif' (e.g. not true for png files)
+        exif = img._getexif()
+    else:
+        exif = None
+    return exif
 
 
 def get_image_target(args, image_source, timestamp, idx_image, num_images):
@@ -139,14 +156,14 @@ def get_image_target(args, image_source, timestamp, idx_image, num_images):
     if timestamp is not None:
         year = timestamp.strftime('%Y')
         month = timestamp.strftime('%m')
-        file = timestamp.strftime('%Y-%m-%d_%H-%M-%S.%f')[:-3]  # %f gives microseconds, but we only want milliseconds
+        file = timestamp.strftime('%Y-%m-%d_%H_%M_%S.%f')[:-3]  # %f gives microseconds, but we only want milliseconds
         ext = os.path.splitext(image_source)[1]
         image_target = os.path.join(args.imageArchive, year, month, file + ext)
     else:
         if args.addNoExif:
             image_target = os.path.join(args.imageArchive, 'no_exif_data', os.path.basename(image_source))
         else:
-            logging.warning('Image {} of {}: skip "{}" due to missing exif data!'.format(idx_image, num_images,
+            logging.warning('Image {} of {}: skip "{}" due to missing exif data!'.format(idx_image + 1, num_images,
                                                                                          image_source))
             image_target = None
     return image_target
@@ -162,7 +179,7 @@ def check_duplicate(args, image_source, image_target, idx_image, num_images):
                 if args.addDuplicates:
                     image_target = os.path.join(args.imageArchive, 'duplicate_images', os.path.basename(image_target))
                 else:
-                    logging.warning('Image {} of {}: skip "{}" as it is a duplicate of "{}"!'.format(idx_image,
+                    logging.warning('Image {} of {}: skip "{}" as it is a duplicate of "{}"!'.format(idx_image + 1,
                                     num_images, image_source, os.path.join(os.path.dirname(image_target), file)))
                     image_target = None
                 return image_target
@@ -190,6 +207,10 @@ def add_image_to_archive(args, image_source, image_target, idx_image, num_images
     logging.info('Image {} of {}: {} "{}" to "{}"'.format(idx_image + 1, num_images,
                                                           args.mode, image_source, image_target))
     os.makedirs(os.path.dirname(image_target), exist_ok=True)
+    if args.confirm:
+        confirm = input('{} "{}" to "{}"? (y/n) '.format(args.mode, image_source, image_target))
+        if confirm == 'n':
+            return
     getattr(shutil, args.mode)(image_source, image_target)
 
 
