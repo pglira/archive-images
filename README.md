@@ -2,11 +2,12 @@
 
 Small python package to create an image archive from a bunch of unordered images. The images are archived on the basis of the timestamp in the exif data.
 
-The default target path of an image in the archive is: `year/month/%Y_%m_%d_%H_%M_%S.%f.ext`, e.g. `image_archive\2018\04\2018-04-03_17_21_20.219.jpg`
+The default target path of an image in the archive is `year/month/%Y_%m_%d_%H_%M_%S.%f.ext`, e.g. `image_archive\2018\04\2018-04-03_17_21_20.219.jpg`
 
 Install with `pip install .`, then call the help screen with `archiveImages --help`.
 
-Help screen:
+## Help screen
+
 ```
 usage: archiveImages [-h] -i IMAGEFOLDER [-e IMAGEEXTENSIONS] -a IMAGEARCHIVE
                      [-m {copy,move}] [-d] [-n] [-c]
