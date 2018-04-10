@@ -16,11 +16,14 @@ def main(args_in=sys.argv[1:]):
 
     for idx_image, image_source in enumerate(images_source):
         timestamp = get_timestamp(image_source)
-        image_target = get_image_target(args, image_source, timestamp)
-        image_target = check_duplicate(args, image_source, image_target)
-        image_target = add_suffix(args, image_source, image_target)
-        add_image_to_archive(args, image_source, image_target, idx_image, len(images_source))
+        image_target = get_image_target(args, image_source, timestamp, idx_image, len(images_source))
+        if image_target is not None:
+            image_target = check_duplicate(args, image_source, image_target, idx_image, len(images_source))
+        if image_target is not None:
+            image_target = add_suffix(image_target)
+            add_image_to_archive(args, image_source, image_target, idx_image, len(images_source))
 
+    logging.info('Finished!')
     sys.exit(0)
 
 
@@ -131,7 +134,7 @@ def get_timestamp(image):
             return timestamp
 
 
-def get_image_target(args, image_source, timestamp):
+def get_image_target(args, image_source, timestamp, idx_image, num_images):
     """Get target filename of image in image archive."""
     if timestamp is not None:
         year = timestamp.strftime('%Y')
@@ -140,15 +143,29 @@ def get_image_target(args, image_source, timestamp):
         ext = os.path.splitext(image_source)[1]
         image_target = os.path.join(args.imageArchive, year, month, file + ext)
     else:
-        image_target = os.path.join(args.imageArchive, 'no_exif_data', os.path.basename(image_source))
+        if args.addNoExif:
+            image_target = os.path.join(args.imageArchive, 'no_exif_data', os.path.basename(image_source))
+        else:
+            logging.warning('Image {} of {}: skip "{}" due to missing exif data!'.format(idx_image, num_images,
+                                                                                         image_source))
+            image_target = None
     return image_target
 
 
-def check_duplicate(args, image_source, image_target):
+def check_duplicate(args, image_source, image_target, idx_image, num_images):
     """Check if a duplicate image exists already in image archive and alter image_target if necessary."""
-    if os.path.exists(image_target):
-        if isduplicate(image_source, image_target):
-            image_target = os.path.join(args.imageArchive, 'duplicate_images', os.path.basename(image_target))
+    if os.path.isdir(os.path.dirname(image_target)):
+        files_to_check = [name for name in os.listdir(os.path.dirname(image_target))
+                          if name.startswith(os.path.splitext(os.path.basename(image_target))[0])]
+        for file in files_to_check:
+            if isduplicate(image_source, os.path.join(os.path.dirname(image_target), file)):
+                if args.addDuplicates:
+                    image_target = os.path.join(args.imageArchive, 'duplicate_images', os.path.basename(image_target))
+                else:
+                    logging.warning('Image {} of {}: skip "{}" as it is a duplicate of "{}"!'.format(idx_image,
+                                    num_images, image_source, os.path.join(os.path.dirname(image_target), file)))
+                    image_target = None
+                return image_target
     return image_target
 
 
@@ -157,21 +174,21 @@ def isduplicate(image1, image2):
     return open(image1, 'rb').read() == open(image2, 'rb').read()
 
 
-def add_suffix(args, image_source, image_target):
+def add_suffix(image_target):
     """Adds suffix to image_target if a file with the same path already exists."""
     ext = os.path.splitext(image_target)[1]
     image_target_orig = image_target
     i_suffix = 1
     while os.path.exists(image_target):
         image_target = image_target_orig.replace(ext, '_{:02d}'.format(i_suffix) + ext)
-        image_target = check_duplicate(args, image_source, image_target)
         i_suffix += 1
     return image_target
 
 
 def add_image_to_archive(args, image_source, image_target, idx_image, num_images):
     """Adds image to image archive."""
-    logging.info('Image {} of {}: {} "{}" to "{}"'.format(idx_image + 1, num_images, args.mode, image_source, image_target))
+    logging.info('Image {} of {}: {} "{}" to "{}"'.format(idx_image + 1, num_images,
+                                                          args.mode, image_source, image_target))
     os.makedirs(os.path.dirname(image_target), exist_ok=True)
     getattr(shutil, args.mode)(image_source, image_target)
 
