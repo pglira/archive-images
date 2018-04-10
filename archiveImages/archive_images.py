@@ -41,20 +41,23 @@ def parse_args(args_in):
         return input_string.split(',')
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-i', '--imageFolder', help='Path to folder with images to archive', dest='imageFolder',
-                        required=True, type=path_to_folder)
-    parser.add_argument('-e', '--imageExtensions', help='Extensions of images to archive separated by commas',
-                        dest='imageExtensions', required=False, default=['jpg', 'jpeg'], type=image_extensions)
-    parser.add_argument('-a', '--imageArchive', help='Path to folder with image archive', dest='imageArchive',
-                        required=True, type=path_to_folder)
-    parser.add_argument('-m', '--mode', help='Move or copy image files to archive?', dest='mode',
-                        required=False, default='copy', choices=['copy', 'move'])
-    parser.add_argument('-d', '--addDuplicates', help='Add duplicates to a subfolder "duplicates" in image archive?',
-                        dest='addDuplicates', required=False, action='store_true')
-    parser.add_argument('-n', '--addNoExif', help='Add images with no exif information to a subfolder "no_exif" in \
-                        image archive?', dest='addNoExif', required=False, action='store_true')
-    parser.add_argument('-c', '--confirm', help='Confirm each operation before execution?', dest='confirm',
-                        required=False, action='store_true')
+    parser._action_groups.pop()
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
+    required.add_argument('-i', '--imageFolder', help='Path to folder with images to archive', dest='imageFolder',
+                          required=True, type=path_to_folder)
+    required.add_argument('-a', '--imageArchive', help='Path to folder with image archive', dest='imageArchive',
+                          required=True, type=path_to_folder)
+    optional.add_argument('-e', '--imageExtensions', help='Extensions of images to archive separated by commas',
+                          dest='imageExtensions', required=False, default=['jpg', 'jpeg'], type=image_extensions)
+    optional.add_argument('-m', '--mode', help='Move or copy image files to archive?', dest='mode',
+                          required=False, default='copy', choices=['copy', 'move'])
+    optional.add_argument('-d', '--addDuplicates', help='Add duplicates to a subfolder "duplicates" in image archive?',
+                          dest='addDuplicates', required=False, action='store_true')
+    optional.add_argument('-n', '--addNoExif', help='Add images with no exif information to a subfolder "no_exif" in \
+                          image archive?', dest='addNoExif', required=False, action='store_true')
+    optional.add_argument('-c', '--confirm', help='Confirm each operation before execution?', dest='confirm',
+                          required=False, action='store_true')
     args = parser.parse_args(args_in)
 
     if args.imageFolder == args.imageArchive:

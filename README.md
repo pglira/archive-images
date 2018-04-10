@@ -9,18 +9,19 @@ Install with `pip install .`, then call the help screen with `archiveImages --he
 ## Help screen
 
 ```
-usage: archiveImages [-h] -i IMAGEFOLDER [-e IMAGEEXTENSIONS] -a IMAGEARCHIVE
+usage: archiveImages [-h] -i IMAGEFOLDER -a IMAGEARCHIVE [-e IMAGEEXTENSIONS]
                      [-m {copy,move}] [-d] [-n] [-c]
 
-optional arguments:
-  -h, --help            show this help message and exit
+required arguments:
   -i IMAGEFOLDER, --imageFolder IMAGEFOLDER
                         Path to folder with images to archive (default: None)
+  -a IMAGEARCHIVE, --imageArchive IMAGEARCHIVE
+                        Path to folder with image archive (default: None)
+
+optional arguments:
   -e IMAGEEXTENSIONS, --imageExtensions IMAGEEXTENSIONS
                         Extensions of images to archive separated by commas
                         (default: ['jpg', 'jpeg'])
-  -a IMAGEARCHIVE, --imageArchive IMAGEARCHIVE
-                        Path to folder with image archive (default: None)
   -m {copy,move}, --mode {copy,move}
                         Move or copy image files to archive? (default: copy)
   -d, --addDuplicates   Add duplicates to a subfolder "duplicates" in image
