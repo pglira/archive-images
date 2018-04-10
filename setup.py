@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-required_packages = ['PIL']
+required_packages = ['Pillow']
 
 setup(
     name='archiveImages',
@@ -17,7 +17,7 @@ setup(
     install_requires=required_packages,
     entry_points={
         'console_scripts': [
-            'archiveImages=archiveImages',
+            'archiveImages=archiveImages.archive_images:main',
         ],
     },
 )
