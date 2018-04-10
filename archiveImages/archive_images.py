@@ -53,8 +53,8 @@ def parse_args(args_in):
                         dest='addDuplicates', required=False, action='store_true')
     parser.add_argument('-n', '--addNoExif', help='Add images with no exif information to a subfolder "no_exif" in \
                         image archive?', dest='addNoExif', required=False, action='store_true')
-    parser.add_argument('-c', '--confirm', help='Confirm each operation?', dest='confirm', required=False,
-                        action='store_true')
+    parser.add_argument('-c', '--confirm', help='Confirm each operation before execution?', dest='confirm',
+                        required=False, action='store_true')
     args = parser.parse_args(args_in)
 
     if args.imageFolder == args.imageArchive:
@@ -92,7 +92,7 @@ def setup_logging(args_in, args):
     logger.addHandler(ch)
 
     # Start and report input arguments
-    logging.info('Call: imageArchive ' + ' '.join(args_in))
+    logging.info('Arguments: ' + ' '.join(args_in))
 
 
 def find_images(args):
