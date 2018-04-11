@@ -209,11 +209,11 @@ def add_image_to_archive(args, image_source, image_target, idx_image, num_images
     """Adds image to image archive."""
     logging.info('Image {} of {}: {} "{}" to "{}"'.format(idx_image + 1, num_images,
                                                           args.mode, image_source, image_target))
-    os.makedirs(os.path.dirname(image_target), exist_ok=True)
     if args.confirm:
         confirm = input('{} "{}" to "{}"? (y/n) '.format(args.mode, image_source, image_target))
         if confirm == 'n':
             return
+    os.makedirs(os.path.dirname(image_target), exist_ok=True)
     getattr(shutil, args.mode)(image_source, image_target)
 
 
