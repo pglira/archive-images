@@ -161,7 +161,7 @@ def get_image_target(args, image_source, timestamp, idx_image, num_images):
         month = timestamp.strftime('%m')
         file = timestamp.strftime('%Y_%m_%d_%H_%M_%S.%f')[:-3]  # %f gives microseconds, but we only want milliseconds
         ext = os.path.splitext(image_source)[1]
-        image_target = os.path.join(args.imageArchive, year, month, file + ext)
+        image_target = os.path.join(args.imageArchive, year, month, file + ext.lower())
     else:
         if args.addNoExif:
             image_target = os.path.join(args.imageArchive, 'no_exif_data', os.path.basename(image_source))
