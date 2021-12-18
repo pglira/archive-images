@@ -11,7 +11,7 @@ setup(
     classifiers=[
         'Natural Language :: English',
         'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.9',
     ],
     packages=find_packages(),
     install_requires=required_packages,
