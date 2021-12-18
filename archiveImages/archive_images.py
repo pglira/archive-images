@@ -13,6 +13,7 @@ def main(args_in=sys.argv[1:]):
     args = parse_args(args_in)
     setup_logging(args_in, args)
     images_source = find_images(args)
+    images_source = filter_images_by_image_size(images_source, args.filterByImageSize)
 
     for idx_image, image_source in enumerate(images_source):
         timestamp = get_timestamp(image_source)
@@ -55,7 +56,7 @@ def parse_args(args_in):
     required.add_argument(
         "-i",
         "--imageFolder",
-        help="Path to folder with images to archive",
+        help="Path to input folder with images to archive.",
         dest="imageFolder",
         required=True,
         type=path_to_folder,
@@ -63,15 +64,16 @@ def parse_args(args_in):
     required.add_argument(
         "-a",
         "--imageArchive",
-        help="Path to folder with image archive",
+        help="Path to output folder with image archive.",
         dest="imageArchive",
         required=True,
         type=path_to_folder,
     )
+    # TODO Use parsing of lists of argumentParser, i.e. type=str, nargs="+"
     optional.add_argument(
         "-e",
         "--imageExtensions",
-        help="Extensions of images to archive separated by commas",
+        help="Extensions of images to archive separated by commas.",
         dest="imageExtensions",
         required=False,
         default=["jpg", "jpeg"],
@@ -85,6 +87,21 @@ def parse_args(args_in):
         required=False,
         default="copy",
         choices=["copy", "move"],
+    )
+    optional.add_argument(
+        "-fs",
+        "--filterByImageSize",
+        help="""
+        Archive only images with a specific image size. The image size must be specified as two
+        integer numbers separated by a single space, i.e. num1 num2. The orientation of the images
+        (portrait or landscape) is not considered by this filter, i.e. images with size
+        num1-by-num2 or num2-by-num1 are archived.
+        """,
+        dest="filterByImageSize",
+        required=False,
+        nargs=2,
+        default=[0, 0],
+        type=int,
     )
     optional.add_argument(
         "-d",
@@ -114,7 +131,11 @@ def parse_args(args_in):
     args = parser.parse_args(args_in)
 
     if args.imageFolder == args.imageArchive:
-        logging.error('Same paths provided for "imageFolder" and "imageArchive"!')
+        print('Error: Same paths provided for "imageFolder" and "imageArchive"!')
+        sys.exit(1)
+
+    if any(size < 0 for size in args.filterByImageSize):
+        print("Error: Image size values must be positive!")
         sys.exit(1)
 
     return args
@@ -164,6 +185,27 @@ def find_images(args):
         logging.error('No images found in "{}"!'.format(args.imageFolder))
         sys.exit(1)
     return images_source
+
+
+def filter_images_by_image_size(images_source, image_size):
+    """Keep only images with specified image size."""
+
+    if all(
+        size > 0 for size in image_size
+    ):  # if image_size is not [0, 0] (default value)
+        images_source_filtered = []
+        for image_source in images_source:
+            width, height = Image.open(image_source).size
+            if sorted([width, height]) == image_size:
+                images_source_filtered.append(image_source)
+    else:
+        images_source_filtered = images_source
+
+    if len(images_source_filtered) == 0:
+        logging.error("No images remaining after filtering images by image size!")
+        sys.exit(1)
+
+    return images_source_filtered
 
 
 def get_timestamp(image):
