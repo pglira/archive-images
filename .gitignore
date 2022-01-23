@@ -1,3 +1,5 @@
-archiveImages/__pycache__/
-archiveImages.egg-info/
 build/
+archive_images.egg-info/
+dist/
+archiveimages/__pycache__/
+archiveImages.egg-info/
