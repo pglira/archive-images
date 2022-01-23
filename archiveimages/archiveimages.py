@@ -44,9 +44,6 @@ def parse_args(args_in):
             raise argparse.ArgumentTypeError(msg)
         return path
 
-    def image_extensions(input_string):
-        return input_string.split(",")
-
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -69,15 +66,15 @@ def parse_args(args_in):
         required=True,
         type=path_to_folder,
     )
-    # TODO Use parsing of lists of argumentParser, i.e. type=str, nargs="+"
     optional.add_argument(
         "-e",
         "--imageExtensions",
-        help="Extensions of images to archive separated by commas.",
+        help='Extensions of images to archive separated by a single space, e.g. "jpg jpeg".',
         dest="imageExtensions",
         required=False,
         default=["jpg", "jpeg"],
-        type=image_extensions,
+        nargs="+",
+        type=str,
     )
     optional.add_argument(
         "-m",
@@ -91,12 +88,7 @@ def parse_args(args_in):
     optional.add_argument(
         "-fs",
         "--filterByImageSize",
-        help="""
-        Archive only images with a specific image size. The image size must be specified as two
-        integer numbers separated by a single space, i.e. num1 num2. The orientation of the images
-        (portrait or landscape) is not considered by this filter, i.e. images with size
-        num1-by-num2 or num2-by-num1 are archived.
-        """,
+        help='Archive only images with a specific image size. The image size must be specified as two integer numbers separated by a single space, i.e. "num1 num2". The orientation of the images (portrait or landscape) is not considered by this filter, i.e. images with size num1-by-num2 or num2-by-num1 are archived.',
         dest="filterByImageSize",
         required=False,
         nargs=2,
