@@ -1,12 +1,14 @@
 # archive-images
 
+[![](https://img.shields.io/pypi/v/archive-images)](https://pypi.org/project/archive-images)
+
 ## Description
 
 Small python package to create an image archive from a bunch of unordered images. The images are archived on the basis of the timestamp in the exif data.
 
 ## Installation
 
-Install with:
+You can install the simpleicp package from [PyPI](https://pypi.org/project/archive-images/):
 
 ```
 pip install archive-images
