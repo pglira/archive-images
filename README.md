@@ -18,11 +18,11 @@ Then call the help screen of executable with `archive-images --help`.
 
 ## Usage notes
 
-The default target path of an image in the archive is `year/month/%Y_%m_%d_%H_%M_%S.%f.ext`, e.g. `image_archive\2018\04\2018-04-03_17_21_20.219.jpg`. Note that the extension of an image is automatically converted to lowercase, e.g. ``.JPG`` to ``.jpg``.
+The default target path of an image in the archive is `year/month/%Y_%m_%d_%H_%M_%S.%f.ext`, e.g. `image_archive\2018\04\2018_04_03_17_21_20.219.jpg`. Note that the extension of an image is automatically converted to lowercase, e.g. ``.JPG`` to ``.jpg``.
 
 ## Help screen
 
-<!-- Manual formatting needed in order to not exceed 100 char -->
+<!-- Manual formatting of helpscreen needed in order to not exceed 100 char -->
 
 ```
 usage: archive-images [-h] -i IMAGEFOLDER -a IMAGEARCHIVE [-e IMAGEEXTENSIONS] [-m {copy,move}]
