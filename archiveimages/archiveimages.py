@@ -194,8 +194,8 @@ def filter_images_by_image_size(images_source, image_size):
         images_source_filtered = images_source
 
     if len(images_source_filtered) == 0:
-        logging.error("No images remaining after filtering images by image size!")
-        sys.exit(1)
+        logging.warning("No images remaining after filtering images by image size!")
+        sys.exit(0)
 
     return images_source_filtered
 
