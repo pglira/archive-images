@@ -7,7 +7,7 @@ readme_filepath = (root_dirpath / "README.md").read_text()
 
 setup(
     name="archive-images",
-    version="1.0.3",  # should match version in __init__.py
+    version="1.0.4",  # should match version in __init__.py
     description="Archive images based on exif timestamp.",
     long_description=readme_filepath,
     long_description_content_type="text/markdown",
