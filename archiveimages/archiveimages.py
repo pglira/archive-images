@@ -174,8 +174,8 @@ def find_images(args):
         if images_to_add:
             images_source.extend(images_to_add)
     if not images_source:
-        logging.error('No images found in "{}"!'.format(args.imageFolder))
-        sys.exit(1)
+        logging.warning('No images found in "{}"!'.format(args.imageFolder))
+        sys.exit(0)
     return images_source
 
 
