@@ -88,7 +88,10 @@ def parse_args(args_in):
     optional.add_argument(
         "-fs",
         "--filterByImageSize",
-        help='Archive only images with a specific image size. The image size must be specified as two integer numbers separated by a single space, i.e. "num1 num2". The orientation of the images (portrait or landscape) is not considered by this filter, i.e. images with size num1-by-num2 or num2-by-num1 are archived.',
+        help="Archive only images with a specific image size. The image size must be specified as "
+        'two integer numbers separated by a single space, i.e. "num1 num2". The orientation of the '
+        "images (portrait or landscape) is not considered by this filter, i.e. images with size "
+        "num1-by-num2 or num2-by-num1 are archived.",
         dest="filterByImageSize",
         required=False,
         nargs=2,
