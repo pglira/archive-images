@@ -188,7 +188,7 @@ def filter_images_by_image_size(images_source, image_size):
         images_source_filtered = []
         for image_source in images_source:
             width, height = Image.open(image_source).size
-            if sorted([width, height]) == image_size:
+            if sorted([width, height]) == sorted(image_size):
                 images_source_filtered.append(image_source)
     else:
         images_source_filtered = images_source
